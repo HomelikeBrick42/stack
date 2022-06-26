@@ -20,6 +20,9 @@ mod tests {
             Instruction::Add,
             Instruction::Print,
         ];
+        /*
+            5 6 + print
+        */
 
         let mut type_stack = Vec::new();
         type_check(&instructions, &mut type_stack).unwrap();
@@ -51,6 +54,21 @@ mod tests {
                 ],
             },
         ];
+        /*
+            // `true if` is also valid
+            if true {
+                69
+            } else {
+                420
+            }
+            print
+
+            if false {
+                5
+            } else {
+                34 35 +
+            }
+        */
 
         let mut type_stack = Vec::new();
         type_check(&instructions, &mut type_stack).unwrap();
@@ -83,6 +101,12 @@ mod tests {
             },
             Instruction::Drop,
         ];
+        /*
+            1 while dup 10 <= {
+                dup print
+                1 +
+            } drop
+        */
 
         let mut type_stack = Vec::new();
         type_check(&instructions, &mut type_stack).unwrap();
