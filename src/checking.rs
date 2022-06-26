@@ -36,61 +36,59 @@ pub fn type_check(instructions: &[Instruction], type_stack: &mut Vec<Type>) -> R
                 type_stack.push(value.get_type());
             }
             Instruction::Dup => {
-                expect_at_least_type_count(&type_stack, 1)?;
+                expect_at_least_type_count(type_stack, 1)?;
                 type_stack.push(type_stack.last().unwrap().clone());
             }
             Instruction::Drop => {
-                expect_at_least_type_count(&type_stack, 1)?;
+                expect_at_least_type_count(type_stack, 1)?;
                 type_stack.pop();
             }
             Instruction::Add | Instruction::Subtract => {
-                expect_at_least_types(&type_stack, &[Type::Integer, Type::Integer])?;
+                expect_at_least_types(type_stack, &[Type::Integer, Type::Integer])?;
                 type_stack.pop();
             }
             Instruction::LessThan | Instruction::GreaterThan => {
-                expect_at_least_types(&type_stack, &[Type::Integer, Type::Integer])?;
+                expect_at_least_types(type_stack, &[Type::Integer, Type::Integer])?;
                 type_stack.pop();
                 type_stack.pop();
                 type_stack.push(Type::Bool);
             }
             Instruction::Equal => {
-                expect_at_least_type_count(&type_stack, 2)?;
+                expect_at_least_type_count(type_stack, 2)?;
                 type_stack.pop();
                 type_stack.pop();
                 type_stack.push(Type::Bool);
             }
             Instruction::Not => {
-                expect_at_least_types(&type_stack, &[Type::Bool])?;
+                expect_at_least_types(type_stack, &[Type::Bool])?;
             }
             Instruction::Print => {
-                expect_at_least_type_count(&type_stack, 1)?;
+                expect_at_least_type_count(type_stack, 1)?;
                 type_stack.pop();
             }
             Instruction::If {
                 then_block,
                 else_block,
             } => {
-                expect_at_least_types(&type_stack, &[Type::Bool])?;
+                expect_at_least_types(type_stack, &[Type::Bool])?;
                 type_stack.pop();
 
                 type_check(then_block, type_stack)?;
                 let mut else_types = Vec::new();
                 type_check(else_block, &mut else_types)?;
-                expect_types_equal(&else_types, &type_stack)?;
+                expect_types_equal(&else_types, type_stack)?;
             }
             Instruction::While {
                 condition_block: condition,
                 body_block,
             } => {
-                let mut condition_types = type_stack.clone();
-                type_check(condition, &mut condition_types)?;
-                expect_at_least_types(&condition_types, &[Type::Bool])?;
-                condition_types.pop();
-                expect_types_equal(&condition_types, &type_stack)?;
+                type_check(condition, type_stack)?;
+                expect_at_least_types(type_stack, &[Type::Bool])?;
+                type_stack.pop();
 
                 let mut body_types = type_stack.clone();
                 type_check(body_block, &mut body_types)?;
-                expect_types_equal(&body_types, &type_stack)?;
+                expect_types_equal(&body_types, type_stack)?;
             }
         }
     }
