@@ -1,13 +1,38 @@
-use derive_more::{Display, IsVariant, Unwrap};
+use std::fmt::Display;
 
-#[derive(Clone, PartialEq, Debug, Display, IsVariant, Unwrap)]
+use derive_more::{IsVariant, Unwrap};
+
+#[derive(Clone, PartialEq, Debug, IsVariant, Unwrap)]
 pub enum Type {
-    #[display(fmt = "type")]
     Type,
-    #[display(fmt = "int")]
     Integer,
-    #[display(fmt = "bool")]
     Bool,
-    #[display(fmt = "proc{:?} -> {:?}", _0, _1)]
     Procedure(Vec<Type>, Vec<Type>),
+}
+
+impl Display for Type {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            Type::Type => write!(f, "type"),
+            Type::Integer => write!(f, "int"),
+            Type::Bool => write!(f, "bool"),
+            Type::Procedure(parameter_types, return_types) => {
+                write!(f, "proc[")?;
+                for (i, typ) in parameter_types.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, " ")?;
+                    }
+                    write!(f, "{}", typ)?;
+                }
+                write!(f, "] -> [")?;
+                for (i, typ) in return_types.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, " ")?;
+                    }
+                    write!(f, "{}", typ)?;
+                }
+                write!(f, "]")
+            }
+        }
+    }
 }
