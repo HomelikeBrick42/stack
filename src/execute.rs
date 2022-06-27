@@ -71,6 +71,10 @@ pub fn execute(
                 }
                 execute(body_block, stack, stdout)?;
             },
+            Instruction::Call => {
+                let procedure = stack.pop().unwrap().unwrap_procedure();
+                execute(&procedure.instructions, stack, stdout)?;
+            }
         }
         i += 1;
     }

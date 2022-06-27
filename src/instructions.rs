@@ -1,12 +1,22 @@
+use std::rc::Rc;
+
 use derive_more::{Display, IsVariant, Unwrap};
 
 use crate::types::Type;
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Procedure {
+    pub typ: Type,
+    pub instructions: Vec<Instruction>,
+}
 
 #[derive(Clone, Debug, PartialEq, Display, IsVariant, Unwrap)]
 pub enum Value {
     Type(Type),
     Integer(isize),
     Bool(bool),
+    #[display(fmt = "{} {{ ... }}", "_0.typ")]
+    Procedure(Rc<Procedure>),
 }
 
 impl Value {
@@ -15,6 +25,7 @@ impl Value {
             Value::Type(_) => Type::Type,
             Value::Integer(_) => Type::Integer,
             Value::Bool(_) => Type::Bool,
+            Value::Procedure(proc) => proc.typ.clone(),
         }
     }
 }
@@ -39,4 +50,5 @@ pub enum Instruction {
         condition_block: Vec<Instruction>,
         body_block: Vec<Instruction>,
     },
+    Call,
 }

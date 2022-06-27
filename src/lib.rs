@@ -5,10 +5,12 @@ pub mod types;
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use crate::{
         checking::type_check,
         execute::execute,
-        instructions::{Instruction, Value},
+        instructions::{Instruction, Procedure, Value},
         types::Type,
     };
 
@@ -117,5 +119,46 @@ mod tests {
         execute(&instructions, &mut stack, &mut output).unwrap();
         assert_eq!(stack, []);
         assert_eq!(output, "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n");
+    }
+
+    #[test]
+    fn procedure() {
+        let instructions = [
+            Instruction::Push(Value::Integer(5)),
+            Instruction::Push(Value::Procedure(Rc::new(Procedure {
+                typ: Type::Procedure(vec![Type::Integer], vec![Type::Integer]),
+                instructions: vec![],
+            }))),
+            Instruction::Call,
+            Instruction::Print,
+            Instruction::Push(Value::Integer(34)),
+            Instruction::Push(Value::Integer(35)),
+            Instruction::Push(Value::Procedure(Rc::new(Procedure {
+                typ: Type::Procedure(vec![Type::Integer, Type::Integer], vec![]),
+                instructions: vec![Instruction::Add, Instruction::Print],
+            }))),
+            Instruction::Call,
+        ];
+        /*
+            5
+            proc[int] -> [int] {}
+            call print
+
+            34 35
+            proc[int int] -> [] {
+                + print
+            }
+            call
+        */
+
+        let mut type_stack = Vec::new();
+        type_check(&instructions, &mut type_stack).unwrap();
+        assert_eq!(type_stack, []);
+
+        let mut output = String::new();
+        let mut stack = Vec::new();
+        execute(&instructions, &mut stack, &mut output).unwrap();
+        assert_eq!(stack, []);
+        assert_eq!(output, "5\n69\n");
     }
 }

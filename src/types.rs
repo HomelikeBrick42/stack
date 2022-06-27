@@ -8,4 +8,6 @@ pub enum Type {
     Integer,
     #[display(fmt = "bool")]
     Bool,
+    #[display(fmt = "proc{:?} -> {:?}", _0, _1)]
+    Procedure(Vec<Type>, Vec<Type>),
 }

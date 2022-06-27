@@ -90,6 +90,19 @@ pub fn type_check(instructions: &[Instruction], type_stack: &mut Vec<Type>) -> R
                 type_check(body_block, &mut body_types)?;
                 expect_types_equal(&body_types, type_stack)?;
             }
+            Instruction::Call => {
+                expect_at_least_type_count(type_stack, 1)?;
+                let typ = type_stack.pop().unwrap();
+                if !typ.is_procedure() {
+                    return Err(format!("Expected a procedure to call, but got {}", typ));
+                }
+                let (parameter_types, mut return_types) = typ.unwrap_procedure();
+                expect_at_least_types(type_stack, &parameter_types)?;
+                for _ in parameter_types {
+                    type_stack.pop();
+                }
+                type_stack.append(&mut return_types);
+            }
         }
     }
     Ok(())
