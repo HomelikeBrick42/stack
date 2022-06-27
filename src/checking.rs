@@ -34,6 +34,13 @@ pub fn type_check(instructions: &[Instruction], type_stack: &mut Vec<Type>) -> R
         match instruction {
             Instruction::Push(value) => {
                 type_stack.push(value.get_type());
+                if value.is_procedure() {
+                    let procedure = value.clone().unwrap_procedure();
+                    let (parameter_types, return_types) = procedure.typ.clone().unwrap_procedure();
+                    let mut proc_type_stack = parameter_types.clone();
+                    type_check(&procedure.instructions, &mut proc_type_stack)?;
+                    expect_types_equal(&proc_type_stack, &return_types)?;
+                }
             }
             Instruction::Dup => {
                 expect_at_least_type_count(type_stack, 1)?;
